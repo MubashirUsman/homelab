@@ -1,0 +1,16 @@
+[Unit]
+{% if service.description is defined %}
+Description={{ service.description }} service
+{% endif %}
+{% if service.wants is defined %}
+Wants={{ service.wants }}
+{% endif %}
+{% if service.after is defined %}
+After={{ service.after }}
+{% endif %}
+
+[Service]
+Type={{ service.type | default('oneshot') }}
+{% if service.exec_start is defined %}
+ExecStart={{ service.exec_start }}
+{% endif %}

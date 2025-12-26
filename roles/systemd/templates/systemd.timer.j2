@@ -1,0 +1,17 @@
+[Unit]
+Description={{ timer.description }}
+
+[Timer]
+{% if timer.on_calendar is defined %}
+OnCalendar={{ timer.on_calendar }}
+{% endif %}
+Persistent={{ timer.persistent | default('true') }}
+
+{% if timer.unit is defined %}
+Unit={{ timer.unit }}
+{% else %}
+Unit={{ timer.name }}.service
+{% endif %}
+
+[Install]
+WantedBy={{ timer.wanted_by | default('timers.target') }}

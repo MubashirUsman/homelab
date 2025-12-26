@@ -1,0 +1,28 @@
+- name: Install Pi-hole dependencies
+  apt:
+    name:
+      - curl
+      - dnsutils
+    state: present
+  become: true
+
+- name: Create pihole group
+  ansible.builtin.group:
+    name: pihole
+    state: present
+  become: true
+
+- name: Create pihole user
+  ansible.builtin.user:
+    name: pihole
+    group: pihole
+    shell: /usr/sbin/nologin
+    state: present
+  become: true
+
+- name: Install Pi-hole
+  shell: |
+    curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+  args:
+    creates: /etc/pihole
+  become: true

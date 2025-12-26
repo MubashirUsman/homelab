@@ -1,0 +1,84 @@
+---
+- name: Ensure apt is using HTTPS
+  ansible.builtin.apt:
+    name: "{{ item  }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+- name: Create apt keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Add Docker GPG key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    dest: /etc/apt/keyrings/docker.gpg
+    mode: '0644'
+  become: true
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_apt_repository }}"
+    state: present
+  become: true
+
+- name: Install Docker cli CE and runtime
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  become: true
+
+- name: Configure Docker daemon options
+  ansible.builtin.template:
+    src: "templates/docker_daemon.json.j2"
+    dest: "/etc/docker/daemon.json"
+    owner: 'mubashir'
+    group: 'mubashir'
+    mode: '0755'
+    notify: Restart Docker
+  become: true
+
+- name: Ensure docker service is enabled & running
+  ansible.builtin.systemd:
+    name: "{{ services }}"
+    enabled: true
+    state: started
+  become: true
+  loop:
+    - docker.service
+    - containerd.service
+  loop_control:
+    loop_var: services
+
+- name: Add systemd timer for docker prune
+  ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
+  become: true
+  vars:
+    systemd_timers:
+      - description: "Docker prune"
+        name: "docker_prune"
+        on_calendar: "weekly"
+  when: docker_prune_enabled
+
+- name: Systemd service for docker prune
+  ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
+  become: true
+  vars:
+    systemd_services:
+      - description: "Docker prune"
+        name: "docker_prune"
+        exec_start: "docker system prune -f"
+        type: "oneshot"
+  when: docker_prune_enabled

@@ -1,0 +1,18 @@
+# 1. update apt cache 2. 
+---
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: yes
+
+- name: Install common packages
+  ansible.builtin.apt:
+    pkg:
+    - ca-certificates
+    - vim
+    - gnupg
+    - curl
+    state: present
+  become: yes
+
