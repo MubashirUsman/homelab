@@ -72,7 +72,7 @@
         on_calendar: "weekly"
   when: docker_prune_enabled
 
-- name: Systemd service for docker prune
+- name: Add Systemd service for docker prune
   ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
   become: true
   vars:

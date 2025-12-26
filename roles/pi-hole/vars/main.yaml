@@ -1,0 +1,7 @@
+pihole_install_dir: /etc/pihole
+pihole_interface: eth0
+pihole_dns_1: 1.1.1.1
+pihole_dns_2: 8.8.8.8
+pihole_web_password: ""
+query_logging: true
+timezone: europe/Berlin

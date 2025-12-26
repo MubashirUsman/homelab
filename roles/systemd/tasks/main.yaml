@@ -53,3 +53,13 @@
     loop_var: timer
   when: systemd_timers | length > 0
   become: true
+
+- name: Ensure service is in a given state, defaults to enabled and started
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    enabled: "{{ item.enabled | default(true) }}"
+    state: "{{ item.state | default('started') }}"
+  loop: "{{ systemd_services | default([]) }}"
+  loop_control:
+    loop_var: item
+  become: true

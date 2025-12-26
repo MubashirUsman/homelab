@@ -1,0 +1,6 @@
+---
+- name: Install pihole on pi-1
+  hosts: infra
+  become: true
+  roles:
+    - pi-hole
