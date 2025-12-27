@@ -11,27 +11,52 @@
     path: /etc/pihole/pihole-FTL.conf
   register: pihole_installed
 
+- name: Create Pi-hole configuration directory
+  ansible.builtin.file:
+    path: /etc/pihole
+    state: directory
+    mode: '0755'
+  become: true
+  when: not pihole_installed.stat.exists
+
+- name: Pre-configure Pi-hole setupVars
+  ansible.builtin.copy:
+    dest: /etc/pihole/setupVars.conf
+    content: |
+      PIHOLE_INTERFACE={{ pihole_interface }}
+      TZ={{ timezone }}
+      DNSMASQ_LISTENING=single
+      PIHOLE_DNS_1={{ pihole_dns_1 }}
+      PIHOLE_DNS_2={{ pihole_dns_2 }}
+      QUERY_LOGGING={{ query_logging }}
+      INSTALL_WEB_INTERFACE=true
+      WEBPASSWORD={{ pihole_web_password }}
+  become: true
+  when: not pihole_installed.stat.exists
+
 - name: Install Pi-hole (unattended)
   ansible.builtin.shell: |
-    curl -sSL https://install.pi-hole.net | \
-    PIHOLE_INTERFACE={{ pihole_interface }} \
-    TZ={{ timezone }} \
-    QUERY_LOGGING: {{ query_logging }}
-    DNSMASQ_LISTENING=single \
-    PIHOLE_DNS_1={{ pihole_dns_1 }} \
-    PIHOLE_DNS_2={{ pihole_dns_2 }} \
-    WEBPASSWORD={{ pihole_web_password }} \
-    bash /dev/stdin --unattended
+    set -eux
+    set -o pipefail
+    curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/pihole
   when: not pihole_installed.stat.exists
   become: true
 
 - name: Ensure Pi-hole service is enabled and started
-  ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
+  ansible.builtin.include_role:
+    name: systemd
   vars:
+    systemd_manage_units: false
+    systemd_manage_timers: false
+    systemd_manage_services: true
     systemd_services:
-      - name: pihole-FTL
+      - name: pihole-FTL.service
         enabled: true
         state: started
+  when: pihole_installed.stat.exists
 
 - name: Add "mubashir" user to pihole group
   ansible.builtin.user:
@@ -39,3 +64,4 @@
     groups: pihole
     append: yes
   become: true
+  when: not pihole_installed.stat.exists

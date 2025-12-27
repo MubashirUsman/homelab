@@ -1,0 +1,11 @@
+---
+- name: Ensure services are in a given state
+  ansible.builtin.systemd:
+    name: "{{ service.name }}"
+    enabled: "{{ service.enabled | default(true) }}"
+    state: "{{ service.state | default('started') }}"
+  loop: "{{ systemd_services }}"
+  loop_control:
+    loop_var: service
+  when: systemd_services is defined
+  become: true
