@@ -1,0 +1,18 @@
+---
+# check if image is present
+# if not pull the image with specific tag
+# set name and envs for the image
+# specify ports and volumes if needed
+# 
+- name: Check if image is present
+  community.docker.docker_image_info:
+    name: {{ image_name | default('') }}
+    tag: {{ image_tag | default('') }}
+  register: image_info
+
+- name: pull an image
+  community.docker.docker_image_pull:
+    name: {{ image_name | default('') }}
+    tag: {{ image_tag | default('latest') }}
+    platform: linux/arm64
+  when: image_info.images | length == 0

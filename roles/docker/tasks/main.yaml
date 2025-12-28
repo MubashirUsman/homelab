@@ -9,6 +9,11 @@
     - curl
     - software-properties-common
 
+- name: Ensure old versions of Docker are not installed.
+  ansible.builtin.package:
+    name: "{{ docker_obsolete_packages }}"
+    state: absent
+
 - name: Create apt keyrings directory
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -61,6 +66,13 @@
     - containerd.service
   loop_control:
     loop_var: services
+
+- name: Add mubashir to docker group
+  ansible.builtin.user:
+    name: mubashir
+    groups: docker
+    append: true
+  become: true
 
 - name: Add systemd timer for docker prune
   ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"

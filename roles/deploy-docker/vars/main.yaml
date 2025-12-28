@@ -1,0 +1,12 @@
+image_name: ""
+image_tag: ""
+container_name: ""
+cpu_limit: ""
+memory_limit: ""
+env_vars: {}
+healthcheck_cmd: ""
+healthcheck_interval: ""
+healthcheck_retries: ""
+healthcheck_start_period: ""
+ports: []
+volumes: []

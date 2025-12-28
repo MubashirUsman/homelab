@@ -1,0 +1,15 @@
+---
+- name: Create a container
+  community.docker.docker_container:
+    name: "{{ container_name | default(image_name) }}"
+    image: "{{ image_name }}:{{ image_tag | default('latest') }}"
+    cpus: "{{ cpu_limit | default(0.5) }}"
+    memory: "{{ memory_limit | default('256M') }}"
+    env: "{{ env_vars | default({}) }}"
+    healthcheck:
+      test: ["CMD-SHELL", "{{ healthcheck_cmd | default('exit 1') }}"]
+      interval: "{{ healthcheck_interval | default('30s') }}"
+      retries: "{{ healthcheck_retries | default(3) }}"
+      start_period: "{{ healthcheck_start_period | default('10s') }}"
+    published_ports: "{{ ports | default([]) }}"
+    volumes: "{{ volumes | default([]) }}"

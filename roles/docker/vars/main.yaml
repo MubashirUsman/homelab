@@ -4,3 +4,13 @@ docker_apt_repository: "deb [arch=arm] https://download.docker.com/linux/ubuntu 
 docker_daemon_options:
   storage-driver: "overlay2"
 docker_prune_enabled: false
+docker_obsolete_packages:
+  - docker.io
+  - docker
+  - docker-engine
+  - docker-compose
+  - docker-doc
+  - podman-docker
+  - docker-compose-v2
+  - containerd
+  - runc

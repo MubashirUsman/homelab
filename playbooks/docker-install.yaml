@@ -1,0 +1,5 @@
+---
+- name: install docker on pi-3
+  hosts: app
+  roles:
+    - docker

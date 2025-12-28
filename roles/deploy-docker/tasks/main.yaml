@@ -2,8 +2,8 @@
 - name: Check if docker is installed
   ansible.builtin.package:
     name:
-      - docker
-      - docker-compose
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
     state: present
   become: true
-
