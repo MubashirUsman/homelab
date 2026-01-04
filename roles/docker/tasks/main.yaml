@@ -14,6 +14,12 @@
     name: "{{ docker_obsolete_packages }}"
     state: absent
 
+- name: Ensure keyrings directory is not present
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.gpg
+    state: absent
+  become: true
+
 - name: Create apt keyrings directory
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -23,8 +29,8 @@
 
 - name: Add Docker GPG key
   ansible.builtin.get_url:
-    url: "https://download.docker.com/linux/ubuntu/gpg"
-    dest: /etc/apt/keyrings/docker.gpg
+    url: "https://download.docker.com/linux/debian/gpg"
+    dest: /etc/apt/keyrings/docker.asc
     mode: '0644'
   become: true
 
@@ -32,6 +38,7 @@
   ansible.builtin.apt_repository:
     repo: "{{ docker_apt_repository }}"
     state: present
+    update_cache: true
   become: true
 
 - name: Install Docker cli CE and runtime
@@ -39,11 +46,13 @@
     name: "{{ item }}"
     state: present
     update_cache: true
+    autoremove: true
   loop:
     - docker-ce
     - docker-ce-cli
     - containerd.io
   become: true
+  when: docker_install_enabled
 
 - name: Configure Docker daemon options
   ansible.builtin.template:
@@ -51,8 +60,8 @@
     dest: "/etc/docker/daemon.json"
     owner: 'mubashir'
     group: 'mubashir'
-    mode: '0755'
-    notify: Restart Docker
+    mode: '0644'
+  notify: Restart Docker
   become: true
 
 - name: Ensure docker service is enabled & running
@@ -74,23 +83,48 @@
     append: true
   become: true
 
-- name: Add systemd timer for docker prune
-  ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
-  become: true
-  vars:
-    systemd_timers:
-      - description: "Docker prune"
-        name: "docker_prune"
-        on_calendar: "weekly"
-  when: docker_prune_enabled
-
 - name: Add Systemd service for docker prune
-  ansible.builtin.include_tasks: "{{ dirs.systemd.tasks }}/main.yaml"
-  become: true
+  ansible.builtin.include_role:
+    name: systemd
   vars:
     systemd_services:
       - description: "Docker prune"
         name: "docker_prune"
         exec_start: "docker system prune -f"
         type: "oneshot"
+    systemd_manage_units: true
   when: docker_prune_enabled
+  # become: true
+
+- name: Add systemd timer for docker prune
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_timers:
+      - description: "Docker prune"
+        name: "docker_prune"
+        on_calendar: "weekly"
+    systemd_manage_timers: true
+  when: docker_prune_enabled
+  # become: true
+
+- name: Ensure docker prune timer is enabled and started
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_manage_services: true
+    systemd_timer_name:
+      - name: docker_prune
+        enabled: true
+  when: docker_prune_enabled
+  # become: true
+
+- name: Restart docker service
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_manage_services: true
+    systemd_service_name:
+      - name: docker.service
+        state: restarted
+  when: restart_docker_service

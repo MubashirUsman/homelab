@@ -2,6 +2,8 @@
 systemd_services: []
 systemd_timers: []
 systemd_extra_services: []
+systemd_timer_name: []
+systemd_service_name: []
 # systemd_manage_units: false
 # systemd_manage_timers: false
 # systemd_manage_services: false

@@ -1,5 +1,10 @@
 ---
 - name: install docker on pi-3
   hosts: app
+  become: true
   roles:
-    - docker
+    - role: docker
+      vars:
+        docker_prune_enabled: true
+        docker_install_enabled: false
+        restart_docker_service: true

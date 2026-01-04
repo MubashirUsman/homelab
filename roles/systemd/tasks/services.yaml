@@ -4,8 +4,19 @@
     name: "{{ service.name }}"
     enabled: "{{ service.enabled | default(true) }}"
     state: "{{ service.state | default('started') }}"
-  loop: "{{ systemd_services }}"
+  loop: "{{ systemd_service_name }}"
   loop_control:
     loop_var: service
-  when: systemd_services is defined
+  when: systemd_service_name is defined
+  become: true
+
+- name: Ensure timers are in a given state
+  ansible.builtin.systemd:
+    name: "{{ timer.name }}.timer"
+    enabled: "{{ timer.enabled | default(true) }}"
+    state: "{{ timer.state | default('started') }}"
+  loop: "{{ systemd_timer_name }}"
+  loop_control:
+    loop_var: timer
+  when: systemd_timer_name is defined
   become: true

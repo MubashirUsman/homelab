@@ -1,8 +1,9 @@
 ---
 docker_apt_release_channel: "stable"
-docker_apt_repository: "deb [arch=arm] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+docker_apt_repository: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
 docker_daemon_options:
   storage-driver: "overlay2"
+  metrics-addr: "127.0.0.1:9323"
 docker_prune_enabled: false
 docker_obsolete_packages:
   - docker.io
@@ -14,3 +15,5 @@ docker_obsolete_packages:
   - docker-compose-v2
   - containerd
   - runc
+docker_install_enabled: true
+restart_docker_service: false
