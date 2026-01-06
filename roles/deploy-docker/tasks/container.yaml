@@ -3,8 +3,8 @@
   ansible.builtin.file:
     path: "{{ dir.host_path }}"
     state: directory
-    owner: "{{ dir.user_id }}"
-    group: "{{ dir.user_gid }}"
+    owner: "{{ user_id }}"
+    group: "{{ user_gid }}"
   loop: "{{ host_volume_dir }}"
   loop_control:
     loop_var: dir
@@ -14,8 +14,8 @@
   ansible.builtin.copy:
     content: "{{ dir.content | default('') }}"
     dest: "{{ dir.host_path }}/{{ dir.file_name }}"
-    owner: "{{ dir.user_id }}"
-    group: "{{ dir.user_gid }}"
+    owner: "{{ user_id }}"
+    group: "{{ user_gid }}"
     mode: "{{ dir.file_mode | default('0644') }}"
   loop: "{{ host_volume_dir }}"
   loop_control:
@@ -26,8 +26,8 @@
   ansible.builtin.file:
     path: "{{ dir.host_path }}/{{ dir.file_name }}"
     state: touch
-    owner: "{{ dir.user_id }}"
-    group: "{{ dir.user_gid }}"
+    owner: "{{ user_id }}"
+    group: "{{ user_gid }}"
   loop: "{{ host_volume_dir }}"
   loop_control:
     loop_var: dir
@@ -35,8 +35,8 @@
 
 - name: Create a container
   community.docker.docker_container:
-    name: "{{ container_name | default(image_name) }}"
-    image: "{{ image.name }}:{{ image.tag | default('latest') }}"
+    name: "{{ container_name }}"
+    image: "{{ item.name }}:{{ item.tag | default('latest') }}"
     cpus: "{{ cpu_limit | default(0.5) }}"
     memory: "{{ memory_limit | default('256M') }}"
     env: "{{ env_vars | default({}) }}"
@@ -47,7 +47,8 @@
       start_period: "{{ healthcheck_start_period | default('10s') }}"
     published_ports: "{{ ports | default([]) }}"
     user: "{{ user_id }}:{{ user_gid }}"
-    volumes: "{{ volumes | default([]) }}"
+    volumes: "{{ c_volumes | default([]) }}"
+    state: started
     loop: "{{ docker_image_info }}"
     loop_control:
-      loop_var: image
+      loop_var: item

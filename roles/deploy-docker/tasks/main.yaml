@@ -5,7 +5,13 @@
   ignore_errors: yes
   changed_when: false
 
-- name: 
-  ansible.builtin.import_tasks: pull.yaml
-  when: docker_check.rc == 0
-  vars:
+- name: Fail if Docker is not installed
+  ansible.builtin.fail:
+    msg: "Docker is not installed on this host. Please install Docker to proceed."
+  when: docker_check.rc != 0
+
+- ansible.builtin.import_tasks: pull.yaml
+  when: docker_image_info is defined
+
+- ansible.builtin.include_tasks: container.yaml
+  when: docker_image_info is defined

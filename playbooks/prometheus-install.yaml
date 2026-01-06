@@ -15,10 +15,10 @@
           PROMETHEUS_CONFIG_PATH: /etc/prometheus/prometheus.yaml
         ports:
           - "9090:9090"
+        user_id: 6000
+        user_gid: 6000
         host_volume_dir:
           - host_path: /opt/prometheus/config
-            user_id: 6000
-            user_gid: 6000
             file_name: prometheus.yaml
             content: |
               global:
@@ -29,6 +29,6 @@
                 - job_name: 'prometheus'
                   static_configs:
                     - targets: ['localhost:9090']
-        volumes:
+        c_volumes:
           - prometheus-data:/prometheus # using docker volume
           - /opt/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
