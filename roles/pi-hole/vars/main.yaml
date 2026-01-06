@@ -5,3 +5,4 @@ pihole_dns_2: 8.8.8.8
 pihole_web_password: ""
 query_logging: true
 timezone: europe/Berlin
+pihole_enable_backup: false

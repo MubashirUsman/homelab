@@ -3,4 +3,6 @@
   hosts: infra
   become: true
   roles:
-    - pi-hole
+    - role: pi-hole
+      vars:
+        pihole_enable_backup: true

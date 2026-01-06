@@ -8,8 +8,13 @@
 
 - name: Check if Pi-hole is already installed
   ansible.builtin.stat:
-    path: /etc/pihole/pihole-FTL.conf
+    path: /etc/pihole/pihole.toml
   register: pihole_installed
+  become: true
+
+- name: Check status of Pi-hole 
+  ansible.builtin.debug:
+    msg: " Pihole installed status {{ pihole_installed.stat.exists }}"
 
 - name: Create Pi-hole configuration directory
   ansible.builtin.file:
@@ -65,3 +70,29 @@
     append: yes
   become: true
   when: not pihole_installed.stat.exists
+
+- name: Backup Pi-hole settings weekly using systemd timer and service
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_manage_timers: true
+    systemd_timers:
+      - name: pihole-backup
+        description: "Pi-hole Settings backup"
+        on_calendar: "weekly"
+        unit: pihole-backup.service
+    systemd_timer_name:
+      - name: pihole-backup
+        enabled: true
+        state: started
+    systemd_manage_units: true
+    systemd_services:
+      - name: pihole-backup
+        wants: pihole-backup.timer
+        after: network.target
+        exec_start: /usr/local/bin/pihole -a -t /home/mubashir/pihole-backup/backup_$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+    systemd_service_name:
+      - name: pihole-backup
+        enabled: true
+        state: started
+  when: pihole_enable_backup #when is evaluated at runtime
