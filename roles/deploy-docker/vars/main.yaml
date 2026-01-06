@@ -1,5 +1,7 @@
-image_name: ""
-image_tag: ""
+docker_image_info: []
+image_names: ""
+docker_host: unix:///var/run/docker.sock
+# image_tag: ""
 container_name: ""
 cpu_limit: ""
 memory_limit: ""
@@ -10,3 +12,5 @@ healthcheck_retries: ""
 healthcheck_start_period: ""
 ports: []
 volumes: []
+host_volume_dir: []
+file_name: ""

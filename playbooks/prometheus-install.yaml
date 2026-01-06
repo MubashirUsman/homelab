@@ -1,0 +1,34 @@
+---
+- name: Deploy Prometheus
+  hosts: monitoring
+  become: true
+  roles:
+    - role: deploy-docker
+      vars:
+        docker_image_info:
+          - name: prom/prometheus
+            tag: v3.8.0
+        container_name: prometheus
+        cpu_limit: 1.0
+        env_vars:
+          PROMETHEUS_STORAGE_PATH: /prometheus
+          PROMETHEUS_CONFIG_PATH: /etc/prometheus/prometheus.yaml
+        ports:
+          - "9090:9090"
+        host_volume_dir:
+          - host_path: /opt/prometheus/config
+            user_id: 6000
+            user_gid: 6000
+            file_name: prometheus.yaml
+            content: |
+              global:
+                scrape_interval: 15s
+                evaluation_interval: 15s
+              
+              scrape_configs:
+                - job_name: 'prometheus'
+                  static_configs:
+                    - targets: ['localhost:9090']
+        volumes:
+          - prometheus-data:/prometheus # using docker volume
+          - /opt/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml

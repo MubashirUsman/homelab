@@ -1,9 +1,11 @@
 ---
-- name: Check if docker is installed
-  ansible.builtin.package:
-    name:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    state: present
-  become: true
+- name: If docker is installed, else exit
+  ansible.builtin.command: docker --version
+  register: docker_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: 
+  ansible.builtin.import_tasks: pull.yaml
+  when: docker_check.rc == 0
+  vars:

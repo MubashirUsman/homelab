@@ -4,15 +4,26 @@
 # set name and envs for the image
 # specify ports and volumes if needed
 # 
-- name: Check if image is present
-  community.docker.docker_image_info:
-    name: {{ image_name | default('') }}
-    tag: {{ image_tag | default('') }}
-  register: image_info
+# - name: Check if image is present
+#   community.docker.docker_image_info:
+#     name: "{{ image.name }}:{{ image.tag }}"
+#   register: image_info
+#   loop: "{{ docker_image_info }}"
+#   loop_control:
+#     loop_var: image
+  
+# - name: Debug image info
+#   ansible.builtin.debug:
+#     var: image_info
 
 - name: pull an image
   community.docker.docker_image_pull:
-    name: {{ image_name | default('') }}
-    tag: {{ image_tag | default('latest') }}
+    name: {{ image.name }}
+    tag: {{ image.tag | default('latest') }}
     platform: linux/arm64
-  when: image_info.images | length == 0
+    pull: not_present
+    docker_host: {{ docker_host }}
+  # when: image_info.images | length == 0
+  loop: "{{ docker_image_info }}"
+  loop_control:
+    loop_var: image

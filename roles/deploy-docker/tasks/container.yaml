@@ -1,8 +1,42 @@
 ---
+- name: Create a host directory for volume mapping
+  ansible.builtin.file:
+    path: "{{ dir.host_path }}"
+    state: directory
+    owner: "{{ dir.user_id }}"
+    group: "{{ dir.user_gid }}"
+  loop: "{{ host_volume_dir }}"
+  loop_control:
+    loop_var: dir
+  when: host_volume_dir | length > 0
+
+- name: Create a file for the volume mapping with content
+  ansible.builtin.copy:
+    content: "{{ dir.content | default('') }}"
+    dest: "{{ dir.host_path }}/{{ dir.file_name }}"
+    owner: "{{ dir.user_id }}"
+    group: "{{ dir.user_gid }}"
+    mode: "{{ dir.file_mode | default('0644') }}"
+  loop: "{{ host_volume_dir }}"
+  loop_control:
+    loop_var: dir
+  when: host_volume_dir | length > 0 and dir.file_name is defined and dir.content is defined
+
+- name: Create an empty file for the volume mapping
+  ansible.builtin.file:
+    path: "{{ dir.host_path }}/{{ dir.file_name }}"
+    state: touch
+    owner: "{{ dir.user_id }}"
+    group: "{{ dir.user_gid }}"
+  loop: "{{ host_volume_dir }}"
+  loop_control:
+    loop_var: dir
+  when: host_volume_dir | length > 0 and dir.file_name is defined and dir.content is not defined
+
 - name: Create a container
   community.docker.docker_container:
     name: "{{ container_name | default(image_name) }}"
-    image: "{{ image_name }}:{{ image_tag | default('latest') }}"
+    image: "{{ image.name }}:{{ image.tag | default('latest') }}"
     cpus: "{{ cpu_limit | default(0.5) }}"
     memory: "{{ memory_limit | default('256M') }}"
     env: "{{ env_vars | default({}) }}"
@@ -12,4 +46,8 @@
       retries: "{{ healthcheck_retries | default(3) }}"
       start_period: "{{ healthcheck_start_period | default('10s') }}"
     published_ports: "{{ ports | default([]) }}"
+    user: "{{ user_id }}:{{ user_gid }}"
     volumes: "{{ volumes | default([]) }}"
+    loop: "{{ docker_image_info }}"
+    loop_control:
+      loop_var: image
