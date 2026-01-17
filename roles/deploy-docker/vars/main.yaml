@@ -1,4 +1,4 @@
-docker_image_info: []
+docker_image_info: {}
 # image_names: ""
 docker_host: unix:///var/run/docker.sock
 # image_tag: ""
@@ -11,8 +11,10 @@ healthcheck_interval: ""
 healthcheck_retries: ""
 healthcheck_start_period: ""
 ports: []
-c_volumes: []
+volumes: []
 host_volume_dir: []
 file_name: ""
 user_id: ""
 user_gid: ""
+entrypoint: []
+container_healthcheck: ""

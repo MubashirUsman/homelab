@@ -13,5 +13,5 @@
 - ansible.builtin.import_tasks: pull.yaml
   when: docker_image_info is defined
 
-- ansible.builtin.include_tasks: container.yaml
+- ansible.builtin.import_tasks: container.yaml
   when: docker_image_info is defined

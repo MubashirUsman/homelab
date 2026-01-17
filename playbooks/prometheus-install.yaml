@@ -2,21 +2,36 @@
 - name: Deploy Prometheus
   hosts: monitoring
   become: true
+  vars:
+    deploy_prometheus: true
+    reload_prometheus_config: false
+  tasks:
+    - name: Reload prometheus config
+      ansible.builtin.uri:
+        url: "http://localhost:9090/-/reload"
+        method: POST
+      when: reload_prometheus_config == true
   roles:
     - role: deploy-docker
       vars:
         docker_image_info:
-          - name: prom/prometheus
-            tag: v3.8.0
+          name: prom/prometheus
+          tag: v3.8.0
         container_name: prometheus
-        cpu_limit: 1.0
         env_vars:
           PROMETHEUS_STORAGE_PATH: /prometheus
           PROMETHEUS_CONFIG_PATH: /etc/prometheus/prometheus.yaml
+        entrypoint:
+          - "/bin/prometheus"
+          - "--config.file=/etc/prometheus/prometheus.yaml"
+          - "--storage.tsdb.path=/prometheus"
+          - "--web.enable-lifecycle"
+        cpu_limit: 1.0
+        memory_limit: 256M
         ports:
           - "9090:9090"
-        user_id: 6000
-        user_gid: 6000
+        user_id: 65534  # using prometheus default user id 
+        user_gid: 65534
         host_volume_dir:
           - host_path: /opt/prometheus/config
             file_name: prometheus.yaml
@@ -29,6 +44,9 @@
                 - job_name: 'prometheus'
                   static_configs:
                     - targets: ['localhost:9090']
-        c_volumes:
+        healthcheck_cmd: "curl -f http://localhost:9090/-/ready || exit 1"
+        container_healthcheck: prometheus
+        volumes:
           - prometheus-data:/prometheus # using docker volume
           - /opt/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      when: deploy_prometheus == true

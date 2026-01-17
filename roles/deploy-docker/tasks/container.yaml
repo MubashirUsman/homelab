@@ -36,19 +36,30 @@
 - name: Create a container
   community.docker.docker_container:
     name: "{{ container_name }}"
-    image: "{{ item.name }}:{{ item.tag | default('latest') }}"
+    image: "{{ docker_image_info.name }}:{{ docker_image_info.tag | default('latest') }}"
     cpus: "{{ cpu_limit | default(0.5) }}"
-    memory: "{{ memory_limit | default('256M') }}"
+    memory: "{{ memory_limit }}"
     env: "{{ env_vars | default({}) }}"
+    entrypoint: "{{ entrypoint | default([]) }}"
     healthcheck:
       test: ["CMD-SHELL", "{{ healthcheck_cmd | default('exit 1') }}"]
       interval: "{{ healthcheck_interval | default('30s') }}"
-      retries: "{{ healthcheck_retries | default(3) }}"
+      retries: "{{ healthcheck_retries | default(3) | int }}"
       start_period: "{{ healthcheck_start_period | default('10s') }}"
     published_ports: "{{ ports | default([]) }}"
     user: "{{ user_id }}:{{ user_gid }}"
-    volumes: "{{ c_volumes | default([]) }}"
+    volumes: "{{ volumes | default([]) }}"
     state: started
-    loop: "{{ docker_image_info }}"
-    loop_control:
-      loop_var: item
+    restart: true
+    restart_policy: unless-stopped
+    # loop: "{{ docker_image_info }}"
+    # loop_control:
+    #   loop_var: item
+
+- name: Assert container passes healthcheck
+  community.docker.docker_container_info:
+    name: "{{ container_name }}"
+  until: "container_healthcheck.container.State.Health.Status == 'healthy'"
+  retries: 5
+  delay: 10
+  when: healthcheck_cmd is defined

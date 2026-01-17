@@ -18,12 +18,12 @@
 
 - name: pull an image
   community.docker.docker_image_pull:
-    name: "{{ image.name }}"
-    tag: "{{ image.tag | default('latest') }}"
-    platform: linux/arm64
+    name: "{{ docker_image_info.name }}"
+    tag: "{{ docker_image_info.tag | default('latest') }}"
+    platform: linux/arm/v7
     pull: not_present
     docker_host: "{{ docker_host }}"
   # when: image_info.images | length == 0
-  loop: "{{ docker_image_info }}"
-  loop_control:
-    loop_var: image
+  # loop: "{{ docker_image_info }}"
+  # loop_control:
+  #   loop_var: image
