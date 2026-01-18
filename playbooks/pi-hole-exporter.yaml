@@ -1,0 +1,25 @@
+---
+- name: Deploy Pi-hole Exporter
+  hosts: monitoring
+  become: true
+  vars_files:
+    - vars/pihole-secrets.yaml
+  vars:
+    pihole_exporter_install: true
+  roles:
+  - role: deploy-docker
+    vars:
+      container_name: pihole-exporter
+      docker_image_info:
+        name: ekofr/pihole-exporter
+        tag: v1.2.0
+      env_vars:
+        PIHOLE_HOST: http://pi1gen3.local
+        PORT: 9617
+        PIHOLE_PASSWORD: {{ pihole_web_password }}
+      ports:
+        - "9617:9617"
+      memory_limit: 128M
+      cpu_limit: 0.5
+  when: pihole_exporter_install == true
+      
