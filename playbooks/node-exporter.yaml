@@ -1,0 +1,10 @@
+---
+- name: Deploy Node Exporter
+  hosts: infra
+  become: true
+  roles:
+  - role: node-exporter
+    vars:
+      node_exporter_install: true
+      node_exporter_version: "1.8.0"
+      system_architecture: "armv7" #for pi1=armv6

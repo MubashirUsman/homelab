@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'pi3gen1-node-exporter'
+    scheme: http
+    static_configs:
+      - targets: ['192.168.0.10:9100']
+        labels:
+          node: pi3gen1
+  - job_name: 'pi3gen2-node-exporter'
+    static_configs:
+      - targets: ['192.168.0.20:9100']
+        labels:
+          node: pi3gen2
+  - job_name: 'pi1gen3-node-exporter'
+    static_configs:
+      - targets: ['192.168.0.30:9100']
+        labels:
+          node: pi1gen3

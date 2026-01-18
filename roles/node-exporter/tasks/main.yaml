@@ -1,0 +1,50 @@
+- name: Download Node Exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{  node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ system_architecture }}.tar.gz"
+    dest: /tmp/node_exporter.tar.gz
+  become: true
+  when: node_exporter_install == true
+
+- name: Extract Node Exporter
+  ansible.builtin.unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp
+    remote_src: true
+  become: true
+  when: node_exporter_install == true
+
+- name: Copy Node Exporter to /usr/bin
+  ansible.builtin.copy:
+    src: /tmp/node_exporter-{{ node_exporter_version }}.linux-{{ system_architecture }}/node_exporter
+    dest: /usr/bin/node_exporter
+    remote_src: true
+    mode: '0755'
+  become: true
+  when: node_exporter_install == true
+  
+- name: Create Node Exporter systemd service
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_manage_units: true
+    systemd_manage_services: true
+    systemd_services:
+      - description: "Node Exporter"
+        name: node_exporter
+        exec_start: "/usr/bin/node_exporter --collector.cgroups"
+        type: "simple"
+        wants: network.target
+        after: network.target
+        enabled: true
+        state: started
+  when: node_exporter_install == true
+
+- name: Ensure Node Exporter service is enabled and started
+  ansible.builtin.include_role:
+    name: systemd
+  vars:
+    systemd_manage_services: true
+    systemd_service_name:
+      - name: node_exporter
+        enabled: true
+        state: started

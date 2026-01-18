@@ -3,14 +3,23 @@
   hosts: monitoring
   become: true
   vars:
-    deploy_prometheus: true
+    deploy_prometheus: false
     reload_prometheus_config: false
+    update_prometheus_config: true
   tasks:
     - name: Reload prometheus config
       ansible.builtin.uri:
         url: "http://localhost:9090/-/reload"
         method: POST
       when: reload_prometheus_config == true
+    - name: Copy prometheus config to host
+      ansible.builtin.copy:
+        src: "../roles/deploy-docker/files/prometheus.yml"
+        dest: "/opt/prometheus/config/prometheus.yml"
+        mode: '0644'
+        owner: 65534
+        group: 65534
+      when: update_prometheus_config == true
   roles:
     - role: deploy-docker
       vars:
@@ -20,10 +29,10 @@
         container_name: prometheus
         env_vars:
           PROMETHEUS_STORAGE_PATH: /prometheus
-          PROMETHEUS_CONFIG_PATH: /etc/prometheus/prometheus.yaml
+          PROMETHEUS_CONFIG_PATH: /etc/prometheus/prometheus.yml
         entrypoint:
           - "/bin/prometheus"
-          - "--config.file=/etc/prometheus/prometheus.yaml"
+          - "--config.file=/etc/prometheus/prometheus.yml"
           - "--storage.tsdb.path=/prometheus"
           - "--web.enable-lifecycle"
         cpu_limit: 1.0
@@ -34,7 +43,7 @@
         user_gid: 65534
         host_volume_dir:
           - host_path: /opt/prometheus/config
-            file_name: prometheus.yaml
+            file_name: prometheus.yml
             content: |
               global:
                 scrape_interval: 15s
@@ -48,5 +57,5 @@
         container_healthcheck: prometheus
         volumes:
           - prometheus-data:/prometheus # using docker volume
-          - /opt/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
+          - /opt/prometheus/config/:/etc/prometheus/
       when: deploy_prometheus == true
