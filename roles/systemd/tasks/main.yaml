@@ -18,4 +18,4 @@
   when: systemd_manage_timers | default(false)
 
 - import_tasks: services.yaml
-  when: systemd_manage_services | default(true)
+  when: systemd_manage_services | default(false)

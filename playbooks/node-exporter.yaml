@@ -1,6 +1,6 @@
 ---
 - name: Deploy Node Exporter
-  hosts: infra
+  hosts: monitoring #infra
   become: true
   roles:
   - role: node-exporter

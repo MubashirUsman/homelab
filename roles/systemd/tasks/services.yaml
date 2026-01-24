@@ -7,6 +7,7 @@
   loop: "{{ systemd_service_name }}"
   loop_control:
     loop_var: service
+  notify: reload systemd
   when: systemd_service_name is defined
   become: true
 
@@ -18,5 +19,6 @@
   loop: "{{ systemd_timer_name }}"
   loop_control:
     loop_var: timer
+  notify: reload systemd
   when: systemd_timer_name is defined
   become: true
