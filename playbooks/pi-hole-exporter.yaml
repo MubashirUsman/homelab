@@ -14,12 +14,13 @@
         name: ekofr/pihole-exporter
         tag: v1.2.0
       env_vars:
-        PIHOLE_HOST: http://pi1gen3.local
-        PORT: 9617
-        PIHOLE_PASSWORD: {{ pihole_web_password }}
+        PIHOLE_HOSTNAME: "192.168.0.30"
+        PORT: "9617"
+        PIHOLE_PASSWORD: "{{ pihole_web_password }}"
+      # healthcheck_cmd: "nc -z localhost 9617 || exit 1"
       ports:
         - "9617:9617"
       memory_limit: 128M
       cpu_limit: 0.5
-  when: pihole_exporter_install == true
+    when: pihole_exporter_install == true
       

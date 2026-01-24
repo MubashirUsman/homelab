@@ -1,5 +1,5 @@
 ---
-- name: Ensure services are in a given state
+- name: Ensure services are in a given state (from systemd_service_name)
   ansible.builtin.systemd:
     name: "{{ service.name }}"
     enabled: "{{ service.enabled | default(true) }}"
@@ -9,6 +9,18 @@
     loop_var: service
   notify: reload systemd
   when: systemd_service_name is defined
+  become: true
+
+- name: Ensure services are in a given state (from systemd_services)
+  ansible.builtin.systemd:
+    name: "{{ service.name }}"
+    enabled: "{{ service.enabled | default(true) }}"
+    state: "{{ service.state | default('started') }}"
+    daemon_reload: true
+  loop: "{{ systemd_services }}"
+  loop_control:
+    loop_var: service
+  when: systemd_services is defined and systemd_services | length > 0
   become: true
 
 - name: Ensure timers are in a given state

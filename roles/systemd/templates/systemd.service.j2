@@ -14,3 +14,8 @@ Type={{ service.type | default('oneshot') }}
 {% if service.exec_start is defined %}
 ExecStart={{ service.exec_start }}
 {% endif %}
+
+{% if service.wanted_by is defined %}
+[Install]
+WantedBy={{ service.wanted_by }}
+{% endif %}

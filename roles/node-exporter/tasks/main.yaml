@@ -30,26 +30,30 @@
       when: not node_exporter_stat.stat.exists
   when: node_exporter_install == true
 
-- name: Create Node Exporter systemd service
-  ansible.builtin.include_role:
-    name: systemd
-  vars:
-    systemd_manage_units: true
-    systemd_services:
-      - description: "Node Exporter"
-        name: node_exporter
-        exec_start: "/usr/bin/node_exporter --collector.cgroups"
-        type: "simple"
-        wants: network.target
-        after: network.target
-  when: node_exporter_install == true
+- name: Create Systemd service and start Node Exporter
+  block:
+    - name: Create Node Exporter service file
+      ansible.builtin.include_role:
+        name: systemd
+      vars:
+        systemd_manage_units: true
+        systemd_services:
+          - description: "Node Exporter"
+            name: node_exporter
+            exec_start: "/usr/bin/node_exporter --collector.cgroups"
+            type: "simple"
+            wants: network.target
+            after: network.target
+            wanted_by: multi-user.target
+      when: create_systemd_service == true
 
-- name: Ensure Node Exporter service is enabled and started
-  ansible.builtin.include_role:
-    name: systemd
-  vars:
-    systemd_manage_services: true
-    systemd_service_name:
-      - name: node_exporter
-        enabled: true
-        state: restarted
+    - name: Ensure Node Exporter service is enabled and started
+      ansible.builtin.include_role:
+        name: systemd
+      vars:
+        systemd_manage_services: true
+        systemd_services:
+          - name: node_exporter
+            enabled: true
+            state: "{{ node_exporter_service_state }}"
+      when: create_systemd_service == true

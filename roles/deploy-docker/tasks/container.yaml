@@ -42,10 +42,10 @@
     env: "{{ env_vars | default({}) }}"
     entrypoint: "{{ entrypoint | default([]) }}"
     healthcheck:
-      test: ["CMD-SHELL", "{{ healthcheck_cmd | default('exit 1') }}"]
-      interval: "{{ healthcheck_interval | default('30s') }}"
-      retries: "{{ healthcheck_retries | default(3) | int }}"
-      start_period: "{{ healthcheck_start_period | default('10s') }}"
+      test: ["CMD-SHELL", "{{ healthcheck_cmd | default(omit) }}"]
+      interval: "{{ healthcheck_interval | default('10s') }}"
+      retries: "{{ healthcheck_retries | default(5) | int }}"
+      start_period: "{{ healthcheck_start_period | default('15s') }}"
     published_ports: "{{ ports | default([]) }}"
     user: "{{ user_id }}:{{ user_gid }}"
     volumes: "{{ volumes | default([]) }}"
@@ -59,7 +59,17 @@
 - name: Assert container passes healthcheck
   community.docker.docker_container_info:
     name: "{{ container_name }}"
+  register: container_healthcheck
   until: "container_healthcheck.container.State.Health.Status == 'healthy'"
   retries: 5
   delay: 10
-  when: healthcheck_cmd is defined
+  when: healthcheck_cmd is defined and healthcheck_cmd != ""
+
+- name: Wait for service to become responsive
+  ansible.builtin.wait_for:
+    host: "localhost"
+    port: "{{ ports[0].split(':')[0] }}"
+    state: started
+    delay: 5
+    timeout: 30
+  when: ports is defined and ports | length > 0

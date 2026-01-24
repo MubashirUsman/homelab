@@ -14,6 +14,10 @@
 - import_tasks: units.yaml
   when: systemd_manage_units | default(false)
 
+- name: Ensure systemd is reloaded before enabling services
+  ansible.builtin.meta: flush_handlers
+  when: systemd_manage_units | default(false) and systemd_manage_services | default(false)
+
 - import_tasks: timers.yaml
   when: systemd_manage_timers | default(false)
 

@@ -1,3 +1,5 @@
 node_exporter_version: ""
 system_architecture: ""
 node_exporter_install: false
+create_systemd_service: true
+node_exporter_service_state: 'started'
