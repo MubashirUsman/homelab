@@ -4,6 +4,10 @@ docker_apt_repository: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://dow
 docker_daemon_options:
   storage-driver: "overlay2"
   metrics-addr: "127.0.0.1:9323"
+  log-driver: "json-file"
+  log-opts:
+    max-size: "500m"
+    max-file: "3"
 docker_prune_enabled: false
 docker_obsolete_packages:
   - docker.io

@@ -63,6 +63,7 @@
     mode: '0644'
   notify: Restart Docker
   become: true
+  when: update_docker_daemon_config
 
 - name: Ensure docker service is enabled & running
   ansible.builtin.systemd:
