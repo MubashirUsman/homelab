@@ -1,0 +1,26 @@
+- name: Deploy cAdvisor
+  hosts: monitoring
+  become: true
+  roles:
+    - role: deploy-docker
+      vars:
+        docker_image_info:
+          name: gcr.io/cadvisor/cadvisor
+          tag: v0.51.0
+        container_name: cadvisor
+        cpu_limit: 0.5
+        memory_limit: 256M
+        ports:
+          - "8080:8080"
+        user_id: 0  # running as root to access host system metrics
+        user_gid: 0
+        volumes:
+        - /:/rootfs:ro
+        - /var/run:/var/run:rw
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        container_default_behavior: "compatibility"
+        privileged: true
+        devices:
+        - /dev/disk:/dev/disk:rw
+        - /dev/kmsg:/dev/kmsg:rw

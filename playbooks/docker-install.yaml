@@ -8,3 +8,9 @@
         docker_prune_enabled: true
         docker_install_enabled: false
         restart_docker_service: true
+        update_docker_daemon_config: true
+        docker_daemon_config:
+          log-driver: "json-file"
+          log-opts:
+            max-size: "500m"
+            max-file: "3"

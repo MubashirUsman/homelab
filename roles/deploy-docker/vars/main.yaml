@@ -16,5 +16,8 @@ host_volume_dir: []
 file_name: ""
 user_id: ""
 user_gid: ""
-entrypoint: []
+# entrypoint:
 container_healthcheck: ""
+container_default_behavior: "no_defaults"
+privileged: false
+devices: []

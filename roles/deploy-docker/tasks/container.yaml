@@ -40,7 +40,8 @@
     cpus: "{{ cpu_limit | default(0.5) }}"
     memory: "{{ memory_limit }}"
     env: "{{ env_vars | default({}) }}"
-    entrypoint: "{{ entrypoint | default([]) }}"
+    entrypoint: "{{ entrypoint | default(omit) }}"
+    command: "{{ command | default(omit) }}"
     healthcheck:
       test: ["CMD-SHELL", "{{ healthcheck_cmd | default(omit) }}"]
       interval: "{{ healthcheck_interval | default('10s') }}"
@@ -52,6 +53,9 @@
     state: started
     restart: true
     restart_policy: unless-stopped
+    container_default_behavior: "{{ container_default_behavior }}"
+    privileged: "{{ privileged | default(false) }}"
+    devices: "{{ devices | default(omit) }}"
     # loop: "{{ docker_image_info }}"
     # loop_control:
     #   loop_var: item

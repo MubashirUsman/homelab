@@ -22,3 +22,16 @@ scrape_configs:
       - targets: ['192.168.0.30:9100']
         labels:
           node: pi1gen3
+  - job_name: 'pihole'
+    scheme: http
+    static_configs:
+      - targets: ['192.168.0.10:9617']
+        labels:
+          app: pihole
+  - job_name: cadvisor
+    scheme: http
+    static_configs:
+      - targets: ['192.168.0.10:8080']
+        labels:
+          app: cadvisor
+    metrics_path: '/metrics'

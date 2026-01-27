@@ -1,0 +1,25 @@
+---
+- name: Deploy Grafana
+  hosts: monitoring
+  become: true
+  vars_files:
+    - vars/grafana-secrets.yaml
+  vars:
+    deploy_grafana: true
+  roles:
+    - role: deploy-docker
+      vars:
+        docker_image_info:
+          name: grafana/grafana
+          tag: 9.5.2
+        container_name: grafana
+        cpu_limit: 1.0
+        memory_limit: 256M
+        env_vars:
+          GF_SECURITY_ADMIN_USER: "admin"
+          GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+        ports:
+          - "3000:3000"
+        volumes:
+          - grafana-data:/var/lib/grafana
+      when: deploy_grafana == true
