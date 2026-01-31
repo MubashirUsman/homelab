@@ -1,18 +1,29 @@
 # 1. update apt cache 2. 
 ---
-- name: Ensure apt cache is updated
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-  become: true
+- name: Update apt cache and install common packages
+  block:
+  - name: Ensure apt cache is updated
+    ansible.builtin.apt:
+      update_cache: true
+      cache_valid_time: 3600
+    become: true
 
-- name: Install common packages
-  ansible.builtin.apt:
-    pkg:
-    - ca-certificates
-    - vim
-    - gnupg
-    - curl
-    state: present
-  become: true
+  - name: Install common packages
+    ansible.builtin.apt:
+      pkg:
+      - ca-certificates
+      - vim
+      - gnupg
+      - curl
+      state: present
+    become: true
 
+  - name: Add Homelab CA certificate to trust store
+    ansible.builtin.copy:
+      src: "{{ lookup('env', 'HOME')}}/Documents/Lab-RootCA/Lab-RootCA.crt"
+      dest: /usr/local/share/ca-certificates/Lab-RootCA.crt
+      owner: root
+      group: root
+      mode: '0644'
+    notify: update ca-certificates
+    become: true

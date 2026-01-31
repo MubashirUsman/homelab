@@ -1,0 +1,3 @@
+- name: Update packages
+  ansible.builtin.import_tasks: apt.yaml
+  when: update_packages == true
