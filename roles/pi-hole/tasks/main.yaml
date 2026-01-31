@@ -3,6 +3,7 @@
     name:
       - curl
       - dnsutils
+      - sqlite3
     state: present
   become: true
 
@@ -78,7 +79,7 @@
     systemd_manage_timers: true
     systemd_timers:
       - name: pihole-backup
-        description: "Pi-hole Settings backup"
+        description: "Query database backup"
         on_calendar: "weekly"
         unit: pihole-backup.service
     systemd_timer_name:
@@ -86,11 +87,11 @@
         enabled: true
         state: started
     systemd_manage_units: true
-    systemd_services:
+    systemd_services: #Creates systemd unit file
       - name: pihole-backup
         wants: pihole-backup.timer
         after: network.target
-        exec_start: /usr/local/bin/pihole -a -t /home/mubashir/pihole-backup/backup_$(date +"%d-%m-%Y_%H-%M-%S").tar.gz
+        exec_start: sqlite3 /etc/pihole/pihole-FTL.db ".backup /home/mubashir/pihole-querydb-backup/pihole-FTL_$(date +"%d-%m-%Y_%H-%M-%S").db"
     systemd_service_name:
       - name: pihole-backup
         enabled: true
