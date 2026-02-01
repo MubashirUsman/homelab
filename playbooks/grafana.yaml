@@ -5,7 +5,7 @@
   vars_files:
     - vars/grafana-secrets.yaml
   vars:
-    deploy_grafana: true
+    deploy_grafana: false
   roles:
     - role: deploy-docker
       vars:
@@ -18,8 +18,14 @@
         env_vars:
           GF_SECURITY_ADMIN_USER: "admin"
           GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
-        ports:
-          - "3000:3000"
+        # ports:
+        #   - "3000:3000"
         volumes:
           - grafana-data:/var/lib/grafana
       when: deploy_grafana == true
+    - role: deploy-docker
+      vars:
+        create_docker_network:
+          name: applications
+        docker_network_connect:
+            container_name: grafana

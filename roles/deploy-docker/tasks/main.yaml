@@ -1,5 +1,5 @@
 ---
-- name: If docker is installed, else exit
+- name: Continue if docker is installed, else exit
   ansible.builtin.command: docker --version
   register: docker_check
   ignore_errors: yes
@@ -12,6 +12,9 @@
 
 - ansible.builtin.import_tasks: pull.yaml
   when: docker_image_info is defined
+
+- ansible.builtin.import_tasks: network.yaml
+  when: create_docker_network is defined
 
 - ansible.builtin.import_tasks: container.yaml
   when: docker_image_info is defined

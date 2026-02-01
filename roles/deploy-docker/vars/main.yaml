@@ -21,3 +21,5 @@ container_healthcheck: ""
 container_default_behavior: "no_defaults"
 privileged: false
 devices: []
+create_docker_network: {}
+docker_network_connect: {}

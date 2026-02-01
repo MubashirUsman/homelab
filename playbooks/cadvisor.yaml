@@ -1,6 +1,8 @@
 - name: Deploy cAdvisor
   hosts: monitoring
   become: true
+  vars:
+    deploy_cadvisor: false
   roles:
     - role: deploy-docker
       vars:
@@ -10,8 +12,8 @@
         container_name: cadvisor
         cpu_limit: 0.5
         memory_limit: 256M
-        ports:
-          - "8080:8080"
+        # ports:
+        #   - "8080:8080"
         user_id: 0  # running as root to access host system metrics
         user_gid: 0
         volumes:
@@ -24,3 +26,10 @@
         devices:
         - /dev/disk:/dev/disk:rw
         - /dev/kmsg:/dev/kmsg:rw
+      when: deploy_cadvisor
+    - role: deploy-docker
+      vars:
+        create_docker_network:
+          name: applications
+        docker_network_connect:
+          container_name: cadvisor

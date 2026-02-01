@@ -59,3 +59,9 @@
           - prometheus-data:/prometheus # using docker volume
           - /opt/prometheus/config/:/etc/prometheus/
       when: deploy_prometheus == true
+    - role: deploy-docker
+      vars:
+        create_docker_network:
+          name: applications
+        docker_network_connect:
+            container_name: prometheus

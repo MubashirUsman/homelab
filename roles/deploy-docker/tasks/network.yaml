@@ -1,0 +1,7 @@
+- name: Create container network or add container to a network
+  community.docker.docker_network:
+    name: "{{ create_docker_network.name }}"
+    driver: "{{  create_docker_network.driver | default('bridge') }}"
+    appends: true
+    connected: "{{ docker_network_connect.container_name | default(omit) }}"
+  when: create_docker_network | length > 0 or docker_network_connect | length > 0

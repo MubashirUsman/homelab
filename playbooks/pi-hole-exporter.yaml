@@ -17,10 +17,14 @@
         PIHOLE_HOSTNAME: "192.168.0.30"
         PORT: "9617"
         PIHOLE_PASSWORD: "{{ pihole_web_password }}"
-      # healthcheck_cmd: "nc -z localhost 9617 || exit 1"
-      ports:
-        - "9617:9617"
+      # ports:
+      #   - "9617:9617"
       memory_limit: 128M
       cpu_limit: 0.5
     when: pihole_exporter_install == true
-      
+  - role: deploy-docker
+    vars:
+      create_docker_network:
+        name: applications
+      docker_network_connect:
+          container_name: pihole-exporter

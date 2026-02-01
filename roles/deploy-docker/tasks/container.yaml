@@ -47,7 +47,7 @@
       interval: "{{ healthcheck_interval | default('10s') }}"
       retries: "{{ healthcheck_retries | default(5) | int }}"
       start_period: "{{ healthcheck_start_period | default('15s') }}"
-    published_ports: "{{ ports | default([]) }}"
+    published_ports: "{{ ports | default(omit) }}"
     user: "{{ user_id }}:{{ user_gid }}"
     volumes: "{{ volumes | default([]) }}"
     state: started
@@ -56,6 +56,7 @@
     container_default_behavior: "{{ container_default_behavior }}"
     privileged: "{{ privileged | default(false) }}"
     devices: "{{ devices | default(omit) }}"
+  when: docker_image_info | length > 0
     # loop: "{{ docker_image_info }}"
     # loop_control:
     #   loop_var: item

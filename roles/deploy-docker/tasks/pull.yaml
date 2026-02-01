@@ -23,6 +23,7 @@
     platform: linux/arm/v7
     pull: not_present
     docker_host: "{{ docker_host }}"
+  when: docker_image_info | length > 0
   # when: image_info.images | length == 0
   # loop: "{{ docker_image_info }}"
   # loop_control:
